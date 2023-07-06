@@ -3,7 +3,7 @@ from rich.table import Table
 import readchar
 
 console = Console()
-todos = {"eat apple": "False", "put banana somewhere": "True", "Fuck Orange": "False", "Yeet grape": "True"}
+todos = {"eat apple": "No", "put banana somewhere": "Yes", "Fuck Orange": "No", "Yeet grape": "Yes"}
 my_list_keys = list(todos.keys())
 
 table = Table(show_header=True, header_style="bold", title="Todos")
@@ -21,6 +21,7 @@ console.print(table)
 selected_row = 0
 
 # Function to update the table display
+# make text strikethrough when value == Yes
 def update_table():
     # Clear the console
     console.clear()
@@ -32,10 +33,21 @@ def update_table():
     new_table.add_column("Done?")
 
     for index, key in enumerate(my_list_keys):
-        if index == selected_row:
-            new_table.add_row(str(index), key, todos[key], style="bold cyan")
+        # make text strikethrough when todos at index == Yes
+        result = ""
+        if todos[key] == "Yes":
+            for c in key:
+                result += c + "\u0336"
+
+            if index == selected_row:
+                new_table.add_row(str(index), result, todos[key], style="bold cyan")
+            else:
+                new_table.add_row(str(index), result, todos[key])
         else:
-            new_table.add_row(str(index), key, todos[key])
+            if index == selected_row:
+                new_table.add_row(str(index), key, todos[key], style="bold cyan")
+            else:
+                new_table.add_row(str(index), key, todos[key])
 
     console.print(new_table)
 
@@ -43,16 +55,16 @@ def update_table():
 def change_text():
     todo = my_list_keys[selected_row]
     current_status = todos[todo]
-    if current_status == "False":
-        todos[todo] = "True"
-    elif current_status == "True":
-        todos[todo] = "False"
+    if current_status == "No":
+        todos[todo] = "Yes"
+    elif current_status == "Yes":
+        todos[todo] = "No"
     update_table()
 
 # Function to add a new todo to the table
 def add_todo():
     new_todo = input("Enter the new todo: ")
-    todos[new_todo] = "False"
+    todos[new_todo] = "No"
     my_list_keys.append(new_todo)  # Add the new todo key to the list of keys
     update_table()
 
@@ -62,6 +74,26 @@ def delete_todo():
     del todos[todo]
     my_list_keys.remove(todo)  # Remove the todo key from the list of keys
     update_table()
+
+# write a function to save the todos to a file
+def save_todos():
+    with open("todos.txt", "w") as f:
+        for key, value in todos.items():
+            f.write(f"{key},{value}\n")
+
+# write a function to load the todos from a file
+def load_todos():
+    with open("todos.txt", "r") as f:
+        for line in f:
+            key, value = line.strip().split(",")
+            todos[key] = value
+            my_list_keys.append(key)
+
+# try to load the todos from a file
+try:
+    load_todos()
+except FileNotFoundError:
+    print("No todos.txt file found. Starting with no todos.")
 
 # Main loop to handle navigation and other actions
 while True:
@@ -79,5 +111,7 @@ while True:
         add_todo()
     elif key == "d":
         delete_todo()
+    elif key == "s":
+        save_todos()
     elif key == "q":
         break
