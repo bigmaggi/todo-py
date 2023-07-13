@@ -105,14 +105,16 @@ def load_todos():
             # Read the contents of the file
             file_contents = f.read()
 
-            # Split the contents into lines
-            lines = file_contents.splitlines()
-
-            # Parse the lines into a dictionary
-            todos = {}
-            for line in lines:
-                key, value = line.split(",")
-                todos[key.strip()] = value.strip()
+            # Check if the file is empty
+            if file_contents.strip() == "":
+                # If the file is empty, use the default todos
+                todos = {"eat apple": "No", "put banana somewhere": "Yes", "Fuck Orange": "No", "Yeet grape": "Yes"}
+            else:
+                # If the file is not empty, parse the contents as key-value pairs
+                todos = {}
+                for line in file_contents.splitlines():
+                    key, value = line.split(",")
+                    todos[key.strip()] = value.strip()
 
             # Update the list of keys
             my_list_keys = list(todos.keys())
